@@ -172,7 +172,7 @@ PageType {
         }
     }
 
-    ListView {
+    ListViewType {
         id: listView
 
         anchors.top: header.bottom
@@ -182,8 +182,6 @@ PageType {
         width: parent.width
 
         enabled: root.pageEnabled
-
-        property bool isFocusable: true
 
         model: SortFilterProxyModel {
             id: proxySitesModel
@@ -204,13 +202,7 @@ PageType {
             ]
         }
 
-        clip: true
-
-        reuseItems: true
-
         delegate: ColumnLayout {
-            id: delegateContent
-
             width: listView.width
 
             LabelWithButtonType {
@@ -246,7 +238,6 @@ PageType {
             DividerType {}
         }
     }
-
 
     Rectangle {
         anchors.fill: addSiteButton
@@ -387,20 +378,16 @@ PageType {
                 }
             }
 
-            FlickableType {
+            ListViewType {
+                id: importSitesDrawerListView
+
                 anchors.top: importSitesDrawerBackButton.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
 
-                contentHeight: importSitesDrawerContent.height
-
-                ColumnLayout {
-                    id: importSitesDrawerContent
-
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                header: ColumnLayout {
+                    width: importSitesDrawerListView.width
 
                     Header2Type {
                         Layout.fillWidth: true
@@ -408,49 +395,67 @@ PageType {
 
                         headerText: qsTr("Import a list of sites")
                     }
+                }
+
+                model: importOptions
+
+                delegate: ColumnLayout {
+                    width: importSitesDrawerListView.width
 
                     LabelWithButtonType {
-                        id: importSitesButton2
                         Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        text: qsTr("Replace site list")
+                        text: title
 
                         clickedFunction: function() {
-                            var fileName = SystemController.getFileName(qsTr("Open sites file"),
-                                                                        qsTr("Sites files (*.json)"))
-                            if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, true)
-                            }
+                            clickedHandler()
                         }
-                    }
-
-                    DividerType {}
-
-                    LabelWithButtonType {
-                        id: importSitesButton3
-                        Layout.fillWidth: true
-                        text: qsTr("Add imported sites to existing ones")
-
-                        clickedFunction: function() {
-                            var fileName = SystemController.getFileName(qsTr("Open sites file"),
-                                                                        qsTr("Sites files (*.json)"))
-                            if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, false)
-                            }
-                        }
-                    }
-
-                    function importSites(fileName, replaceExistingSites) {
-                        PageController.showBusyIndicator(true)
-                        SitesController.importSites(fileName, replaceExistingSites)
-                        PageController.showBusyIndicator(false)
-                        importSitesDrawer.closeTriggered()
-                        moreActionsDrawer.closeTriggered()
                     }
 
                     DividerType {}
                 }
             }
         }
+    }
+
+    property list<QtObject> importOptions: [
+        replaceOption,
+        addOption,
+    ]
+
+    QtObject {
+        id: replaceOption
+
+        readonly property string title: qsTr("Replace site list")
+        readonly property var clickedHandler: function() {
+            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                        qsTr("Sites files (*.json)"))
+            if (fileName !== "") {
+                importSitesDrawerContent.importSites(fileName, true)
+            }
+        }
+    }
+
+    QtObject {
+        id: addOption
+
+        readonly property string title: qsTr("Add imported sites to existing ones")
+        readonly property var clickedHandler: function() {
+            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                        qsTr("Sites files (*.json)"))
+            if (fileName !== "") {
+                importSitesDrawerContent.importSites(fileName, false)
+            }
+        }
+    }
+
+    function importSites(fileName, replaceExistingSites) {
+        PageController.showBusyIndicator(true)
+        SitesController.importSites(fileName, replaceExistingSites)
+        PageController.showBusyIndicator(false)
+        importSitesDrawer.closeTriggered()
+        moreActionsDrawer.closeTriggered()
     }
 }

@@ -10,8 +10,7 @@ import ProtocolEnum 1.0
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-
-ListView {
+ListViewType {
     id: menuContent
 
     property var rootWidth
@@ -19,13 +18,6 @@ ListView {
 
     width: rootWidth
     height: contentItem.height
-
-    clip: true
-    snapMode: ListView.SnapToItem
-
-    ScrollBar.vertical: ScrollBarType {}
-
-    property bool isFocusable: true
 
     ButtonGroup {
         id: containersRadioButtonGroup
